@@ -1,0 +1,100 @@
+{
+  "version": "1.0",
+  "generated_by": "app.manifest",
+  "tools": [
+    {
+      "name": "get_product",
+      "description": "Retrieve product information by product ID. Returns name, category, price, stock, and brand for a single product.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``get_product`` tool.\n\nFields\n------\nproduct_id:\n    Product identifier.  Must match ``^P[0-9]+$`` \u2014 strictly ASCII.\n    Examples: P1001, P1002, P9999.",
+        "properties": {
+          "product_id": {
+            "description": "Product identifier. Format: P followed by ASCII digits. Example: P1001",
+            "examples": [
+              "P1001",
+              "P1005"
+            ],
+            "pattern": "^P[0-9]+$",
+            "pattern_note": "Uses [0-9] not \\d \u2014 ASCII only",
+            "title": "Product Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "product_id"
+        ],
+        "title": "ProductInput",
+        "type": "object"
+      },
+      "row_limit": 1,
+      "read_only": true,
+      "module": "app.handlers"
+    },
+    {
+      "name": "get_user",
+      "description": "Retrieve user information by user ID. Returns name, city, and membership tier for a single user.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``get_user`` tool.\n\nFields\n------\nuser_id:\n    User identifier.  Must match ``^U[0-9]+$`` \u2014 strictly ASCII.\n    Examples: U1001, U1002.",
+        "properties": {
+          "user_id": {
+            "description": "User identifier. Format: U followed by ASCII digits. Example: U1001",
+            "examples": [
+              "U1001",
+              "U1005"
+            ],
+            "pattern": "^U[0-9]+$",
+            "pattern_note": "Uses [0-9] not \\d \u2014 ASCII only",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "UserInput",
+        "type": "object"
+      },
+      "row_limit": 1,
+      "read_only": true,
+      "module": "app.handlers"
+    },
+    {
+      "name": "get_user_orders",
+      "description": "Retrieve orders for a user by user ID. Returns a paginated list of orders with truncation flag if more exist.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``get_user_orders`` tool.\n\nFields\n------\nuser_id:\n    User identifier.  Must match ``^U[0-9]+$``.\nlimit:\n    Maximum number of orders to return.  Capped server-side at\n    ``ORDERS_ROW_LIMIT_MAX`` (default 100).  The LLM cannot override this.",
+        "properties": {
+          "user_id": {
+            "description": "User identifier. Format: U followed by ASCII digits. Example: U1001",
+            "examples": [
+              "U1001"
+            ],
+            "pattern": "^U[0-9]+$",
+            "pattern_note": "Uses [0-9] not \\d \u2014 ASCII only",
+            "title": "User Id",
+            "type": "string"
+          },
+          "limit": {
+            "default": 20,
+            "description": "Maximum orders to return (1\u2013100). Server enforces this even if LLM requests more.",
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "UserOrdersInput",
+        "type": "object"
+      },
+      "row_limit": 100,
+      "read_only": true,
+      "module": "app.handlers"
+    }
+  ]
+}

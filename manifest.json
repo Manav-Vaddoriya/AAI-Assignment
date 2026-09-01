@@ -1,0 +1,137 @@
+{
+  "schema_version": "1",
+  "tools": [
+    {
+      "name": "list_documents",
+      "description": "List documents within a namespace, with cursor-based pagination.\n\nReturns up to ``row_limit`` document summaries.  When there are more\ndocuments in the namespace the response includes a ``next_cursor`` and sets\n``truncated=True``.\n\nCursor format: an opaque base-16 offset string derived from the start\nindex.  The cursor is stable as long as the document set does not change.\n\nParameters\n----------\nreq:\n    A validated ``ListRequest``.  ``namespace`` must be ASCII only.\n\nReturns\n-------\nListResult\n    Page of ``DocumentSummary`` objects plus pagination metadata.",
+      "module": "tools.handlers",
+      "row_limit": 50,
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``list_documents`` tool.\n\nFields\n------\nnamespace:\n    Source namespace to list.  Matches ``[A-Za-z0-9._/-]{1,128}``; ASCII only.\ncursor:\n    Opaque pagination cursor from a previous ``ListResult``.\nrow_limit:\n    Maximum number of rows to return per page.  Capped to 200.",
+        "properties": {
+          "namespace": {
+            "description": "Source namespace \u2014 ASCII alphanumeric, dots, hyphens, slashes.",
+            "pattern": "^[A-Za-z0-9._/-]{1,128}$",
+            "title": "Namespace",
+            "type": "string"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          },
+          "row_limit": {
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Row Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "namespace"
+        ],
+        "title": "ListRequest",
+        "type": "object"
+      }
+    },
+    {
+      "name": "lookup_document",
+      "description": "Look up a single document by its unique identifier.\n\nReturns the document's fields.  If ``fields`` is specified, only those\nnamed keys are returned.  The identifier must match the strict ASCII\npattern ``[A-Za-z0-9][A-Za-z0-9_-]{0,63}``; Pydantic enforces this\nbefore the handler is called.\n\nParameters\n----------\nreq:\n    A validated ``LookupRequest``.\n\nReturns\n-------\nLookupResult\n    The document data (or ``found=False`` if the identifier is unknown).",
+      "module": "tools.handlers",
+      "row_limit": 50,
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``lookup_document`` tool.\n\nFields\n------\nidentifier:\n    Document identifier.  Must match ``[A-Za-z0-9][A-Za-z0-9_-]{0,63}`` \u2014\n    ASCII only, 1 to 64 characters.\nfields:\n    Optional whitelist of field names to return.  Each field name must\n    match ``[A-Za-z0-9_]{1,64}``.\nrow_limit:\n    Maximum number of document fields to return.  For wide documents this\n    prevents unbounded response payloads; the result carries\n    ``truncated=True`` when the field count exceeds this limit.",
+        "properties": {
+          "identifier": {
+            "description": "ASCII identifier, 1\u201364 chars, letters/digits/underscores/hyphens.",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+            "title": "Identifier",
+            "type": "string"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields"
+          },
+          "row_limit": {
+            "default": 50,
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Row Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "title": "LookupRequest",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_documents",
+      "description": "Search documents by keyword query.\n\nReturns up to ``row_limit`` matching documents from the corpus, ranked by\nrelevance score.  When the total matches exceed ``row_limit`` the result\ncarries ``truncated=True`` and a human-readable ``truncation_warning``.\n\nParameters\n----------\nreq:\n    A validated ``SearchRequest``.  Extra fields are rejected before this\n    function is called.\n\nReturns\n-------\nSearchResult\n    Ranked list of ``DocumentHit`` objects plus ``truncated`` / ``total_found``.",
+      "module": "tools.handlers",
+      "row_limit": 20,
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Input model for the ``search_documents`` tool.\n\nFields\n------\nquery:\n    The free-text search string.  Must be between 1 and 512 characters.\nrow_limit:\n    Maximum number of rows to return.  Capped to 100.\nsource_filter:\n    Optional source namespace pattern \u2014 letters, digits, dots, hyphens,\n    forward-slashes.  ASCII only; no ``\\d`` shorthand.",
+        "properties": {
+          "query": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "row_limit": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Row Limit",
+            "type": "integer"
+          },
+          "source_filter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional source namespace filter \u2014 ASCII alphanumeric, dots, hyphens, slashes.",
+            "title": "Source Filter"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "SearchRequest",
+        "type": "object"
+      }
+    }
+  ]
+}

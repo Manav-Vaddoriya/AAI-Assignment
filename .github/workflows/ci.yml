@@ -1,0 +1,37 @@
+name: P13 CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  ci:
+    name: Lint · Test · Manifest Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install pydantic fastapi "uvicorn[standard]" httpx ollama streamlit python-dotenv pytest pytest-cov pytest-asyncio ruff
+
+      - name: Lint (ruff)
+        run: python -m ruff check app/ tests/ scripts/ ui/ --ignore E501
+
+      - name: Seed demo database
+        run: python scripts/seed_database.py
+
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short
+
+      - name: Manifest drift check
+        run: python scripts/generate_manifest.py --check --output manifests/tools.json
